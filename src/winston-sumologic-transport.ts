@@ -1,7 +1,6 @@
 import * as winston from 'winston';
 import * as requestPromise from 'request-promise';
 
-import { Transport, TransportOptions } from 'winston';
 import { TransportInstance } from 'winston';
 
 export interface SumoLogicTransportOptions {
@@ -16,15 +15,15 @@ export interface SumoLogicTransportInstance extends TransportInstance {
 
 export class SumoLogic extends winston.Transport implements SumoLogicTransportInstance {
   url: string;
-  
+
   constructor(options?: SumoLogicTransportOptions) {
     super();
 
-    if (options == null) {
+    if (!options) {
       options = <SumoLogicTransportOptions> {};
     }
-    if (options.url == null) {
-      throw new Error("Need SumoLogic URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source");
+    if (!options.url) {
+      throw new Error('Need SumoLogic URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source');
     }
 
     this.name = 'SumoLogic';
@@ -33,7 +32,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     this.silent = options.silent || false;
   }
 
-  _request(content) {
+  _request(content: any) {
     return requestPromise(this.url, {
       body: content,
       json: true,
@@ -41,9 +40,9 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     });
   }
 
-  log(level, msg, meta, callback) {
+  log(level: string, msg: string, meta: any, callback: Function) {
     if (this.silent) {
-      callback(null, true);
+      callback(undefined, true);
     }
     if (typeof meta === 'function') {
       callback = meta;
@@ -55,13 +54,12 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
       meta: meta
     };
     this._request(content)
-      .then(() => callback(null, true))
+      .then(() => callback(undefined, true))
       .catch((err) => callback(err));
   }
 }
 
-import { Transports } from 'winston';
-declare module "winston" {
+declare module 'winston' {
   export interface Transports {
     SumoLogic: typeof SumoLogic;
   }

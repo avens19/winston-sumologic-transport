@@ -18,7 +18,7 @@ npm install --save winston-sumologic-transport
 ## Options
 
 ```
-url             : The SumoLogic HTTP collector URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source
-level           : The minimum logging level to send to SumoLogic
-silent          : A boolean flag to suppress output
+url     : The SumoLogic HTTP collector URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source
+level   : The minimum logging level to send to SumoLogic
+silent  : A boolean flag to suppress output
 ```
