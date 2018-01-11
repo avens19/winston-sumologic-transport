@@ -1,0 +1,43 @@
+{
+  "name": "winston-sumologic-transport",
+  "description": "A Winston transport for SumoLogic",
+  "version": "0.0.1",
+  "author": {
+    "name": "Andrew Ovens",
+    "email": "avens19@gmail.com"
+  },
+  "homepage": "https://github.com/avens19/winston-sumologic-transport",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/avens19/winston-sumologic-transport.git"
+  },
+  "typings": "./lib/winston-sumologic-transport.d.ts",
+  "keywords": [
+    "logging",
+    "sysadmin",
+    "tools",
+    "winston",
+    "nodejs",
+    "sumologic",
+    "sumo"
+  ],
+  "dependencies": {
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "winston": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/request": "^2.0.9",
+    "@types/request-promise": "^4.1.39",
+    "@types/winston": "^2.3.7",
+    "ts-node": "^4.0.2",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
+  },
+  "main": "./lib/winston-sumologic-transport",
+  "scripts": {
+    "pretest": "node_modules/.bin/tsc",
+    "test": "echo No tests yet",
+    "tslint": "tslint --project tsconfig.json --config tslint.json"
+  }
+}
