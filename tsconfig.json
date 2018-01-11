@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "module": "commonjs",
     "target": "ES6",
     "noImplicitAny": true,
@@ -10,8 +11,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "lib",
-    "baseUrl": ".",
-    "allowJs": true
+    "baseUrl": "."
   },
   "include": [
     "./cleanup/**/*",
