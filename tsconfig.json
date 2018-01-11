@@ -9,7 +9,7 @@
     "strictFunctionTypes": true,
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "baseUrl": ".",
     "allowJs": true
   },
