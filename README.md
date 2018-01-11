@@ -1,6 +1,11 @@
 # winston-sumologic-transport
 A transport for the Winston logger for logging to a SumoLogic endpoint
 
+## Installation
+```
+npm install --save winston-sumologic-transport
+```
+
 ## Usage
 ```javascript
   var winston = require('winston');
@@ -13,10 +18,7 @@ A transport for the Winston logger for logging to a SumoLogic endpoint
 ## Options
 
 ```
-accessKeyId     : your AWS access key id
-secretAccessKey : your AWS secret access key
-region          : the region where the domain is hosted
-useEnvironment  : use process.env values for AWS access, secret, & region
-tableName       : DynamoDB table name
-dynamoDoc       : if this is set to true, the *meta* parameter will be stored as a subobject using DynamoDB's DocumentClient rather than as a JSON string.
+url             : The SumoLogic HTTP collector URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source
+level           : The minimum logging level to send to SumoLogic
+silent          : A boolean flag to suppress output
 ```
