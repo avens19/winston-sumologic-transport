@@ -1,6 +1,8 @@
 # winston-sumologic-transport
 A transport for the Winston logger for logging to a SumoLogic endpoint
 
+[![Build Status](https://travis-ci.org/avens19/winston-sumologic-transport.svg?branch=0.0.1)](https://travis-ci.org/avens19/winston-sumologic-transport)
+
 ## Installation
 ```
 npm install --save winston-sumologic-transport
