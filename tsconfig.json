@@ -2,7 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "module": "commonjs",
-    "target": "ES6",
+    "target": "ES5",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
@@ -11,7 +11,11 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "lib",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "lib": [
+      "es5",
+      "es2015.promise"
+    ]
   },
   "include": [
     "./cleanup/**/*",

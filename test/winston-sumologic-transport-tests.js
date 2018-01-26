@@ -13,15 +13,11 @@ describe('winston-sumologic-transport', () => {
     this.clock.restore();
   });
 
-  it('adds itself to the set of transports', () => {
-    assert.strictEqual(winston.transports.SumoLogic, SumoLogic);
-  });
-
   it('sends logs to the given url every second', function() {
     const scope = nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
       .reply(200, {});
-    const transport = new winston.transports.SumoLogic({
+    const transport = new SumoLogic({
       url: 'http://sumologic.com/logs'
     });
     winston.add(transport, null, true);
@@ -53,7 +49,7 @@ describe('winston-sumologic-transport', () => {
     const scope = nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
       .reply(200, {});
-    const transport = new winston.transports.SumoLogic({
+    const transport = new SumoLogic({
       url: 'http://sumologic.com/logs',
       interval: 4000
     });
@@ -79,7 +75,7 @@ describe('winston-sumologic-transport', () => {
   });
 
   it('obeys the level setting', () => {
-    const transport = new winston.transports.SumoLogic({
+    const transport = new SumoLogic({
       url: 'http://sumologic.com/logs',
       level: 'error'
     });
@@ -93,7 +89,7 @@ describe('winston-sumologic-transport', () => {
   });
 
   it('obeys the silent setting', () => {
-    const transport = new winston.transports.SumoLogic({
+    const transport = new SumoLogic({
       url: 'http://sumologic.com/logs',
       silent: true
     });

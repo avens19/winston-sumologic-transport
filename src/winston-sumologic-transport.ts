@@ -109,11 +109,3 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     }
   }
 }
-
-declare module 'winston' {
-  export interface Transports {
-    SumoLogic: typeof SumoLogic;
-  }
-}
-
-winston.transports.SumoLogic = SumoLogic;

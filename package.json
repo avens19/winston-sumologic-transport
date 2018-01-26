@@ -23,12 +23,10 @@
   ],
   "dependencies": {
     "request": "^2.83.0",
-    "request-promise": "^4.2.2",
     "winston": "^1.1.2"
   },
   "devDependencies": {
     "@types/request": "^2.0.9",
-    "@types/request-promise": "^4.1.39",
     "@types/winston": "^2.3.7",
     "chai": "^4.1.2",
     "eslint": "^4.16.0",
