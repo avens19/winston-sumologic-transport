@@ -30,14 +30,23 @@
     "@types/request": "^2.0.9",
     "@types/request-promise": "^4.1.39",
     "@types/winston": "^2.3.7",
+    "chai": "^4.1.2",
+    "eslint": "^4.16.0",
+    "eslint-config-strict": "^14.0.1",
+    "eslint-plugin-mocha": "^4.11.0",
+    "mocha": "^5.0.0",
+    "nock": "^9.1.6",
+    "promise-mock": "^2.0.1",
+    "sinon": "^4.1.6",
     "ts-node": "^4.0.2",
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
   },
   "main": "./lib/winston-sumologic-transport",
   "scripts": {
+    "eslint": "eslint test",
     "pretest": "node_modules/.bin/tsc",
-    "test": "echo No tests yet",
+    "test": "mocha test",
     "tslint": "tslint --project tsconfig.json --config tslint.json"
   }
 }
