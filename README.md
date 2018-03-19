@@ -12,6 +12,10 @@ npm install --save winston-sumologic-transport
 ```javascript
   var winston = require('winston');
   var { SumoLogic } = require('winston-sumologic-transport');
+
+  var options = {
+    url: 'http://example.com'
+  };
   
   winston.add(SumoLogic, options);
 ```
