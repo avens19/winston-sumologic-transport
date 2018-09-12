@@ -101,8 +101,8 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
         callback = meta;
         meta = {};
       }
-      if(this.label) {
-        msg = `[${this.label}] ${msg}`
+      if (this.label) {
+        msg = `[${this.label}] ${msg}`;
     }
       const content = {
         level: level,
