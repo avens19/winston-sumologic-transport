@@ -8,6 +8,7 @@ export interface SumoLogicTransportOptions {
   level?: string;
   silent?: boolean;
   interval?: number;
+  label?: string;
 }
 
 export interface SumoLogicTransportInstance extends TransportInstance {
@@ -22,6 +23,7 @@ export interface SumoLogicLogEntry {
 
 export class SumoLogic extends winston.Transport implements SumoLogicTransportInstance {
   url: string;
+  label: string;
   _timer: any;
   _waitingLogs: Array<SumoLogicLogEntry>;
   _isSending: boolean;
@@ -41,6 +43,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     this.url = options.url;
     this.level = options.level || 'info';
     this.silent = options.silent || false;
+    this.label = options.label || '';
     this._timer = setInterval(() => {
       if (!this._isSending) {
         this._isSending = true;
@@ -98,6 +101,9 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
         callback = meta;
         meta = {};
       }
+      if (this.label) {
+        msg = `[${this.label}] ${msg}`;
+    }
       const content = {
         level: level,
         message: msg,

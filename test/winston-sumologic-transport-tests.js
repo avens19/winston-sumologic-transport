@@ -100,4 +100,14 @@ describe('winston-sumologic-transport', () => {
     winston.error('nada');
     assert.strictEqual(transport._waitingLogs.length, 0);
   });
+
+  it('obeys the label setting', () => {
+    const transport = new SumoLogic({
+      url: 'http://sumologic.com/logs',
+      label: 'test'
+    });
+    winston.add(transport, null, true);
+    winston.info('this message has a label');
+    assert.strictEqual(transport._waitingLogs[0].message, '[test] this message has a label');
+  });
 });
