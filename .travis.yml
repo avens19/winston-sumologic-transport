@@ -1,18 +1,18 @@
 language: node_js
 node_js:
-  - "lts/*"
+- lts/*
 script:
-  - npm test
-  - npm run tslint
-  - npm run eslint
+- npm test
+- npm run tslint
+- npm run eslint
 before_deploy:
-  - sed -i -e s/0.0.0/$TRAVIS_TAG/ package.json
+- sed -i -e s/0.0.0/$TRAVIS_TAG/ package.json
 deploy:
   provider: npm
   skip_cleanup: true
   email: avens19@gmail.com
   api_key:
-    secure: hYg5hVV2HyF/8uVoZU7H6ngRYa6iW/sfT/Ht/ZUVcCImsyKyndv1Y7x4g5h0L8xZhYS3ul7ciPx35gM70mnwaNLiy6rzGVIkaBuqtQCfltbSadr5CpwXj/zQ4B+AVoLCcJzJt2gdwpJGaU1cztIbqwSyz1IUU1jnzFplEDfYZbGQVbPr2Wspewc1q88kKZamcBU7pkFZjfKgSFVahRyG8uROQUf4+rP5HVr1LMmkPZ7MgWDlw4Rzi51soD8ucIZ0GCF/6RZgEllPoQx942SyS/DEDibAWSdyWN5ojrIU3c46X+xjSY+0JSE9JoRdezvD2RRK3vEBF1XoanT2wPDhAgXGkg4io3zcIUmTAKqlyWr+3ciXFrbDCse/A4Mhcmlfn67TPFBpStSK990yqhWTIboGDBCRV3eVa58oS8HgJ6UtGZ2mZNQsRjZnhKuSQzqHgoQcjG2EphEpkl7SvZdpQWoGyRG0bF3oQRmdzDKmbPsaXgwlG00gVyRYbL/fnYD++SjxeySIv/R8WqwCpjrOOO6b4lXmPUa6g+rz70q/AlYMEiTgDz86XZeyqvCJFDwmuyvVgy8T9eST6XJvjJ7Gl9QkqD4pEghgixceiWj5oQpAoENgDfHmWchcE9fDGiYTSAYiNU7xLl0uyId/wKQk+fDTbIq3viY3Mhwn5kbOBts=
+    secure: h00PhqIZPr9ZrLw/Ip9o/ns1rRj0LsjirKJpAl9lzmUDpNPKoxPnpAG6oFMY0Kz2VnsOx10SLS9ELaB0jrTDD2zoThPPNjvzOEiCgOGDXOZY8scg9hSWaCIUXux2LImnWc2pE7cFnKoWB77gFnXLHOua09xBZJhv/N1aYqFhoceA0XOTbkGyfO39fCA34Mzk0CuF67NNF/oWOD9P6g5G32moMsZt4dMCsXKPrA+RdNIgB9PFse7/Qan2EGwDaCN4FDRlOt9u6Ug8LcAgx11VYjuEud8SNuF9phc/mtJCjGkmyJDoqY+xSBrGfoGKzJoPGkw2AA+R7f85WBFlyTnGYxDscjnPpdSFdihrSA9v2TbSwnFbQ4KhkJ+Oplw0Qke0kUwHXK4d8IUwUWDix7lcoaMkjybP0Vup4yjQqJZ9YmfwJzKqq0SYKK05VZONfdrMtitphWnYZ9stPOB5EKumuy8fmCgYp1z2wdqcMPAlBeDJapJN41Sh9RkNiikqj/aFhMuv68dJZw32UrYq6DNzp3Uu3Xl2KNFcrhIennzn9oUj/CZwiS7m5sasI7+qCKp6onoEg6MmqixPpicG4t2JgXwl/pYfZGCYZGUX64XWNwsTBXWcACGJR3hpZCXnRfg1qGjU5eWfgmStvjzXVltKzyNjPnJWPj3NXR9yytoYn2A=
   on:
     tags: true
     repo: avens19/winston-sumologic-transport
