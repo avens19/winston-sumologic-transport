@@ -27,4 +27,5 @@ url     : The SumoLogic HTTP collector URL. See https://help.sumologic.com/Send-
 level   : The minimum logging level to send to SumoLogic [default: 'info']
 silent  : A boolean flag to suppress output [default: false]
 interval: The interval (in mills) between posts to SumoLogic [default: 1000]
+label: A custom label associated with each message
 ```
