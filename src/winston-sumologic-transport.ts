@@ -1,7 +1,5 @@
-import * as winston from 'winston';
-import * as request from 'request';
-
-import { TransportInstance } from 'winston';
+import request from 'request';
+import TransportStream from 'winston-transport';
 
 export interface SumoLogicTransportOptions {
   url?: string;
@@ -12,17 +10,14 @@ export interface SumoLogicTransportOptions {
   meta?: any;
 }
 
-export interface SumoLogicTransportInstance extends TransportInstance {
-  new (options?: SumoLogicTransportOptions): SumoLogicTransportInstance;
-}
-
 export interface SumoLogicLogEntry {
   level: string;
   message: string;
   meta: any;
 }
 
-export class SumoLogic extends winston.Transport implements SumoLogicTransportInstance {
+export class SumoLogic extends TransportStream {
+  name: string;
   url: string;
   label: string;
   meta?: any;
@@ -46,7 +41,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     this.level = options.level || 'info';
     this.silent = options.silent || false;
     this.label = options.label || '';
-    this.meta = options.meta;
+    this.meta = options.meta || {};
     this._timer = setInterval(() => {
       if (!this._isSending) {
         this._isSending = true;
@@ -94,39 +89,32 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     }
   }
 
-  log(level: string, msg: string, meta: any, callback: Function) {
+  log(info: any, callback: Function) {
     try {
       if (this.silent) {
-        callback(undefined, true);
+        callback();
         return;
       }
-      if (typeof meta === 'function') {
+      const { level, message, ...meta } = info;
+
+      let _meta = meta || {};
+      if (typeof _meta === 'function') {
         callback = meta;
-        meta = {};
+        _meta = {};
       }
+      _meta = {...this.meta, ..._meta};
+      let _message = message;
       if (this.label) {
-        msg = `[${this.label}] ${msg}`;
-      }
-      if (this.meta != undefined && meta !== undefined) {
-        // Merge metas for a call
-        const m = <any> {};
-        Object.keys(this.meta).forEach(k => {
-          m[k] = this.meta[k];
-        });
-        Object.keys(meta).forEach(k => {
-          m[k] = meta[k];
-        });
-        meta = m;
-      } else
-      if (this.meta != undefined && meta === undefined) {
-        meta = this.meta;
+        _message = `[${this.label}] ${message}`;
       }
       const content = {
-        level: level,
-        message: msg,
-        meta: meta
+        level,
+        message: _message,
+        meta: _meta
       };
       this._waitingLogs.push(content);
+      callback();
+
     } catch (e) {
       callback(e);
     }

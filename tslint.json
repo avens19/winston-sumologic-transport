@@ -56,8 +56,7 @@
         "no-trailing-whitespace": true,
         "no-null-keyword": true,
         "prefer-const": true,
-        "jsdoc-format": true,
-        "no-unused-variable": true
+        "jsdoc-format": true
     },
     "jsRules": {
       "class-name": true

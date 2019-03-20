@@ -20,11 +20,11 @@ describe('winston-sumologic-transport', () => {
     const transport = new SumoLogic({
       url: 'http://sumologic.com/logs'
     });
-    winston.add(transport, null, true);
-    winston.info('foo', { extra: 'something' });
+    const logger = winston.createLogger({ transports: [ transport ] });
+    logger.info('foo', { extra: 'something' });
     // shouldn't get logged as the default log level is info
-    winston.verbose('hello', { totally: 'different' });
-    winston.error('bar', { something: 'different' });
+    logger.verbose('hello', { totally: 'different' });
+    logger.error('bar', { something: 'different' });
     this.clock.tick(1050);
     return transport._promise.then(() => {
       assert.ok(scope.isDone(), 'ensure all requests were handled');
@@ -36,8 +36,8 @@ describe('winston-sumologic-transport', () => {
     }).then(() => {
       // No request was sent because there were no messages
       assert.notOk(scope.isDone(), 'a request is still waiting');
-      winston.info('moo', { extra: 'something' });
-      winston.error('far', { something: 'different' });
+      logger.info('moo', { extra: 'something' });
+      logger.error('far', { something: 'different' });
       this.clock.tick(1050);
       return transport._promise;
     }).then(() => {
@@ -53,9 +53,9 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       interval: 4000
     });
-    winston.add(transport, null, true);
-    winston.info('foo', { extra: 'something' });
-    winston.error('bar', { something: 'different' });
+    const logger = winston.createLogger({ transports: [ transport ] });
+    logger.info('foo', { extra: 'something' });
+    logger.error('bar', { something: 'different' });
     this.clock.tick(1050);
     return transport._promise.then(() => {
       assert.notOk(scope.isDone(), 'a request is still waiting');
@@ -79,11 +79,11 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       level: 'error'
     });
-    winston.add(transport, null, true);
-    winston.info('this won\'t be logged');
-    winston.silly('neither will this');
-    winston.warn('not even this one');
-    winston.error('finally something to log');
+    const logger = winston.createLogger({ transports: [ transport ] });
+    logger.info('this won\'t be logged');
+    logger.silly('neither will this');
+    logger.warn('not even this one');
+    logger.error('finally something to log');
     assert.strictEqual(transport._waitingLogs.length, 1);
     assert.strictEqual(transport._waitingLogs[0].message, 'finally something to log');
   });
@@ -93,11 +93,11 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       silent: true
     });
-    winston.add(transport, null, true);
-    winston.info('this won\'t be logged');
-    winston.silly('neither will this');
-    winston.warn('not even this one');
-    winston.error('nada');
+    const logger = winston.createLogger({ transports: [ transport ] });
+    logger.info('this won\'t be logged');
+    logger.silly('neither will this');
+    logger.warn('not even this one');
+    logger.error('nada');
     assert.strictEqual(transport._waitingLogs.length, 0);
   });
 
@@ -106,8 +106,8 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       label: 'test'
     });
-    winston.add(transport, null, true);
-    winston.info('this message has a label');
+    const logger = winston.createLogger({ transports: [ transport ] });
+    logger.info('this message has a label');
     assert.strictEqual(transport._waitingLogs[0].message, '[test] this message has a label');
   });
 
