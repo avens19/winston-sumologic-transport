@@ -109,7 +109,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
       }
       if (this.meta != undefined && meta !== undefined) {
         // Merge metas for a call
-        let m = <any> {}
+        const m = <any> {};
         Object.keys(this.meta).forEach(k => {
           m[k] = this.meta[k];
         });
@@ -119,7 +119,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
         meta = m;
       } else
       if (this.meta != undefined && meta === undefined) {
-        meta = this.meta
+        meta = this.meta;
       }
       const content = {
         level: level,
