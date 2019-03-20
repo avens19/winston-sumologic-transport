@@ -116,24 +116,24 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       label: 'test',
       meta: {
-        myMetaKey1: "val",
-        myMetaKey2: 123,
-      },
+        myMetaKey1: 'val',
+        myMetaKey2: 123
+      }
     });
     winston.add(transport, null, true);
-    winston.info('this message has a meta', { 
+    winston.info('this message has a meta', {
       myMetaKey3: true,
-      myMetaKey2: 124,
+      myMetaKey2: 124
     });
     winston.info('this message does not have a meta');
     assert.deepStrictEqual(transport._waitingLogs[0].meta, {
-      myMetaKey1: "val",
+      myMetaKey1: 'val',
       myMetaKey2: 124,
-      myMetaKey3: true,
+      myMetaKey3: true
     });
     assert.deepStrictEqual(transport._waitingLogs[1].meta, {
-      myMetaKey1: "val",
-      myMetaKey2: 123,
+      myMetaKey1: 'val',
+      myMetaKey2: 123
     });
   });
 });
