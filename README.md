@@ -9,6 +9,7 @@ npm install --save winston-sumologic-transport
 ```
 
 ## Usage
+
 ```javascript
   var winston = require('winston');
   var { SumoLogic } = require('winston-sumologic-transport');
@@ -18,6 +19,18 @@ npm install --save winston-sumologic-transport
   };
   
   winston.add(SumoLogic, options);
+  winston.debug("Hello, world!");
+```
+
+## SumoLogic message
+
+After logging message appears in SumoLogic in following format:
+```json
+{
+  level: "debug"
+  message: "Hello, world!",
+  meta: {}
+}
 ```
 
 ## Options
@@ -27,5 +40,6 @@ url     : The SumoLogic HTTP collector URL. See https://help.sumologic.com/Send-
 level   : The minimum logging level to send to SumoLogic [default: 'info']
 silent  : A boolean flag to suppress output [default: false]
 interval: The interval (in mills) between posts to SumoLogic [default: 1000]
-label: A custom label associated with each message
+label   : A custom label associated with each message (prepended to message)
+meta    : Additional meta data with log message. Properties will be overriden if specified during logging.
 ```

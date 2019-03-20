@@ -9,6 +9,7 @@ export interface SumoLogicTransportOptions {
   silent?: boolean;
   interval?: number;
   label?: string;
+  meta?: any;
 }
 
 export interface SumoLogicTransportInstance extends TransportInstance {
@@ -24,6 +25,7 @@ export interface SumoLogicLogEntry {
 export class SumoLogic extends winston.Transport implements SumoLogicTransportInstance {
   url: string;
   label: string;
+  meta?: any;
   _timer: any;
   _waitingLogs: Array<SumoLogicLogEntry>;
   _isSending: boolean;
@@ -44,6 +46,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     this.level = options.level || 'info';
     this.silent = options.silent || false;
     this.label = options.label || '';
+    this.meta = options.meta;
     this._timer = setInterval(() => {
       if (!this._isSending) {
         this._isSending = true;
@@ -103,7 +106,21 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
       }
       if (this.label) {
         msg = `[${this.label}] ${msg}`;
-    }
+      }
+      if (this.meta != undefined && meta !== undefined) {
+        // Merge metas for a call
+        const m = <any> {};
+        Object.keys(this.meta).forEach(k => {
+          m[k] = this.meta[k];
+        });
+        Object.keys(meta).forEach(k => {
+          m[k] = meta[k];
+        });
+        meta = m;
+      } else
+      if (this.meta != undefined && meta === undefined) {
+        meta = this.meta;
+      }
       const content = {
         level: level,
         message: msg,
