@@ -10,6 +10,7 @@ export interface SumoLogicTransportOptions {
   interval?: number;
   label?: string;
   meta?: any;
+  onError?: (error: Error) => Promise<void>;
 }
 
 export interface SumoLogicTransportInstance extends TransportInstance {
@@ -26,6 +27,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
   url: string;
   label: string;
   meta?: any;
+  onError?: (error: Error) => Promise<void>;
   _timer: any;
   _waitingLogs: Array<SumoLogicLogEntry>;
   _isSending: boolean;
@@ -47,6 +49,7 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     this.silent = options.silent || false;
     this.label = options.label || '';
     this.meta = options.meta;
+    this.onError = options.onError;
     this._timer = setInterval(() => {
       if (!this._isSending) {
         this._isSending = true;
@@ -75,6 +78,13 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
     });
   }
 
+  _handleError(e: Error) {
+    if (this.onError) {
+      return Promise.resolve(this.onError(e));
+    }
+    return Promise.reject(e);
+  }
+
   _sendLogs() {
     try {
       if (this._waitingLogs.length === 0) {
@@ -88,9 +98,10 @@ export class SumoLogic extends winston.Transport implements SumoLogicTransportIn
       return this._request(content)
         .then(() => {
           this._waitingLogs.splice(0, numBeingSent);
-        });
+        })
+        .catch(e => this._handleError(e));
     } catch (e) {
-      return Promise.reject(e);
+      return this._handleError(e);
     }
   }
 
