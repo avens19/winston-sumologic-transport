@@ -27,6 +27,7 @@ export class SumoLogic extends TransportStream {
   _waitingLogs: Array<SumoLogicLogEntry>;
   _isSending: boolean;
   _promise: Promise<void>;
+  _timerInterval: number;
 
   constructor(options?: SumoLogicTransportOptions) {
     super();
@@ -45,6 +46,13 @@ export class SumoLogic extends TransportStream {
     this.label = options.label || '';
     this.meta = options.meta || {};
     this.onError = options.onError;
+    this._timerInterval = options.interval || 1000;
+    this._waitingLogs = [];
+    this._isSending = false;
+    this._promise = Promise.resolve();
+  }
+
+  _startTimer() {
     this._timer = setInterval(() => {
       if (!this._isSending) {
         this._isSending = true;
@@ -52,10 +60,11 @@ export class SumoLogic extends TransportStream {
           .then(() => { this._isSending = false; })
           .catch((e) => { this._isSending = false; throw e; });
       }
-    }, options.interval || 1000);
-    this._waitingLogs = [];
-    this._isSending = false;
-    this._promise = Promise.resolve();
+    }, this._timerInterval);
+  }
+
+  _clearTimer() {
+    clearInterval(this._timer);
   }
 
   _request(content: string) {
@@ -93,6 +102,9 @@ export class SumoLogic extends TransportStream {
       return this._request(content)
         .then(() => {
           this._waitingLogs.splice(0, numBeingSent);
+          if (this._waitingLogs.length === 0) {
+            this._clearTimer();
+          }
         })
         .catch(e => this._handleError(e));
     } catch (e) {
@@ -123,6 +135,9 @@ export class SumoLogic extends TransportStream {
         message: _message,
         meta: _meta
       };
+      if (this._waitingLogs.length === 0) {
+        this._startTimer();
+      }
       this._waitingLogs.push(content);
       callback();
 

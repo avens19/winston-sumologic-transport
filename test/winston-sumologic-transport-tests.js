@@ -160,4 +160,20 @@ describe('winston-sumologic-transport', () => {
       myMetaKey2: 123
     });
   });
+
+  it('exits cleanly when no logs are pending', function() {
+    const { clock } = this;
+    nock('http://sumologic.com')
+      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n')
+      .reply(200, {});
+    const transport = new SumoLogic({
+      url: 'http://sumologic.com/logs'
+    });
+    const logger = winston.createLogger({ transports: [ transport ] });
+    logger.info('foo', { extra: 'something' });
+    clock.tick(1050);
+    return transport._promise.then(() => {
+      clock.runAll();
+    });
+  });
 });
