@@ -126,6 +126,7 @@ export class SumoLogic extends TransportStream {
         _meta = {};
       }
       _meta = {...this.meta, ..._meta};
+      _meta = Object.keys(_meta).length === 0 ? undefined : _meta;
       let _message = message;
       if (this.label) {
         _message = `[${this.label}] ${message}`;
