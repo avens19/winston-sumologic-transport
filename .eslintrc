@@ -1,5 +1,11 @@
 {
-  "extends": "strict",
+  "extends": ["plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
   "env": {
     "mocha": true
   },
@@ -36,6 +42,6 @@
     "sort-imports": 0,
     "space-before-function-paren": [2, "never"],
     "spaced-comment": 0,
-    "template-curly-spacing": 0,
+    "template-curly-spacing": 0
   }
 }

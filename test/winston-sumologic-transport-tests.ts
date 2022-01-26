@@ -1,8 +1,10 @@
-const { assert } = require('chai');
-const winston = require('winston');
-const sinon = require('sinon');
-const nock = require('nock');
-const { SumoLogic } = require('../lib/winston-sumologic-transport');
+import chai from 'chai';
+import winston from 'winston';
+import sinon from 'sinon';
+import nock from 'nock';
+import { SumoLogic } from '../lib/winston-sumologic-transport';
+
+const assert = chai.assert;
 
 describe('winston-sumologic-transport', () => {
   beforeEach(function() {
@@ -13,39 +15,36 @@ describe('winston-sumologic-transport', () => {
     this.clock.restore();
   });
 
-  it('sends logs to the given url every second', function() {
+  it('sends logs to the given url every second', async function() {
     const scope = nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
       .reply(200, {});
     const transport = new SumoLogic({
       url: 'http://sumologic.com/logs'
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('foo', { extra: 'something' });
     // shouldn't get logged as the default log level is info
     logger.verbose('hello', { totally: 'different' });
     logger.error('bar', { something: 'different' });
     this.clock.tick(1050);
-    return transport._promise.then(() => {
-      assert.ok(scope.isDone(), 'ensure all requests were handled');
-      // set up next request
-      scope.post('/logs', '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n')
-        .reply(200, {});
-      this.clock.tick(1050);
-      return transport._promise;
-    }).then(() => {
-      // No request was sent because there were no messages
-      assert.notOk(scope.isDone(), 'a request is still waiting');
-      logger.info('moo', { extra: 'something' });
-      logger.error('far', { something: 'different' });
-      this.clock.tick(1050);
-      return transport._promise;
-    }).then(() => {
-      assert.ok(scope.isDone(), 'ensure all requests were handled');
-    });
+    await transport._promise;
+    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    // set up next request
+    scope.post('/logs', '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n')
+      .reply(200, {});
+    this.clock.tick(1050);
+    await transport._promise;
+    // No request was sent because there were no messages
+    assert.notOk(scope.isDone(), 'a request is still waiting');
+    logger.info('moo', { extra: 'something' });
+    logger.error('far', { something: 'different' });
+    this.clock.tick(1050);
+    await transport._promise;
+    assert.ok(scope.isDone(), 'ensure all requests were handled');
   });
 
-  it('calls onError when there is an error sending to sumo', function() {
+  it('calls onError when there is an error sending to sumo', async function() {
     const scope = nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
       .replyWithError(new Error('Uh oh'));
@@ -54,22 +53,19 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       onError
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('foo', { extra: 'something' });
     // shouldn't get logged as the default log level is info
     logger.verbose('hello', { totally: 'different' });
     logger.error('bar', { something: 'different' });
     this.clock.tick(1050);
-    return transport._promise.then(() => {
-      assert.ok(scope.isDone(), 'ensure all requests were handled');
-      sinon.assert.calledWithMatch(onError, sinon.match.instanceOf(Error));
-      sinon.assert.calledWithMatch(onError, sinon.match({
-        message: 'Uh oh'
-      }));
-    });
+    await transport._promise;
+    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    sinon.assert.calledWithMatch(onError, sinon.match.instanceOf(Error));
+    sinon.assert.calledWithMatch(onError, sinon.match({ message: 'Uh oh' }));
   });
 
-  it('obeys the interval setting', function() {
+  it('obeys the interval setting', async function() {
     const scope = nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
       .reply(200, {});
@@ -77,25 +73,21 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       interval: 4000
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('foo', { extra: 'something' });
     logger.error('bar', { something: 'different' });
     this.clock.tick(1050);
-    return transport._promise.then(() => {
-      assert.notOk(scope.isDone(), 'a request is still waiting');
-      this.clock.tick(1050);
-      return transport._promise;
-    }).then(() => {
-      assert.notOk(scope.isDone(), 'a request is still waiting');
-      this.clock.tick(1050);
-      return transport._promise;
-    }).then(() => {
-      assert.notOk(scope.isDone(), 'a request is still waiting');
-      this.clock.tick(1050);
-      return transport._promise;
-    }).then(() => {
-      assert.ok(scope.isDone(), 'ensure all requests were handled');
-    });
+    await transport._promise;
+    assert.notOk(scope.isDone(), 'a request is still waiting');
+    this.clock.tick(1050);
+    await transport._promise;
+    assert.notOk(scope.isDone(), 'a request is still waiting');
+    this.clock.tick(1050);
+    await  transport._promise;
+    assert.notOk(scope.isDone(), 'a request is still waiting');
+    this.clock.tick(1050);
+    await transport._promise;
+    assert.ok(scope.isDone(), 'ensure all requests were handled');
   });
 
   it('obeys the level setting', () => {
@@ -103,7 +95,7 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       level: 'error'
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('this won\'t be logged');
     logger.silly('neither will this');
     logger.warn('not even this one');
@@ -117,7 +109,7 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       silent: true
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('this won\'t be logged');
     logger.silly('neither will this');
     logger.warn('not even this one');
@@ -130,7 +122,7 @@ describe('winston-sumologic-transport', () => {
       url: 'http://sumologic.com/logs',
       label: 'test'
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('this message has a label');
     assert.strictEqual(transport._waitingLogs[0].message, '[test] this message has a label');
   });
@@ -144,7 +136,7 @@ describe('winston-sumologic-transport', () => {
         myMetaKey2: 123
       }
     });
-    winston.add(transport, null, true);
+    winston.add(transport);
     winston.info('this message has a meta', {
       myMetaKey3: true,
       myMetaKey2: 124
@@ -161,7 +153,7 @@ describe('winston-sumologic-transport', () => {
     });
   });
 
-  it('exits cleanly when no logs are pending', function() {
+  it('exits cleanly when no logs are pending', async function() {
     const { clock } = this;
     nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n')
@@ -169,11 +161,10 @@ describe('winston-sumologic-transport', () => {
     const transport = new SumoLogic({
       url: 'http://sumologic.com/logs'
     });
-    const logger = winston.createLogger({ transports: [ transport ] });
+    const logger = winston.createLogger({ transports: [transport] });
     logger.info('foo', { extra: 'something' });
     clock.tick(1050);
-    return transport._promise.then(() => {
-      clock.runAll();
-    });
+    await transport._promise;
+    clock.runAll();
   });
 });
