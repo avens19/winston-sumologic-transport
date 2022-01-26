@@ -41,7 +41,9 @@
     "logform": "^2.3.2",
     "mocha": "^9.2.0",
     "nock": "^13.2.2",
+    "npm-run-all": "^4.1.5",
     "promise-mock": "^2.1.0",
+    "rimraf": "^3.0.2",
     "sinon": "^12.0.1",
     "ts-mocha": "^9.0.2",
     "ts-node": "^10.4.0",
@@ -52,7 +54,10 @@
   "main": "./lib/winston-sumologic-transport",
   "scripts": {
     "eslint": "eslint ./src",
-    "tsc": "node_modules/.bin/tsc",
+    "clean": "rimraf lib",
+    "tsc": "tsc",
+    "compile": "run-s clean tsc",
+    "prepublish": "npm run compile",
     "test": "ts-mocha -p ./tsconfig.json ./src/**/*.test.ts",
     "tslint": "tslint --project tsconfig.json --config tslint.json"
   }
