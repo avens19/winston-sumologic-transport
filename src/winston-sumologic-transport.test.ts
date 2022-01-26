@@ -2,7 +2,7 @@ import chai from 'chai';
 import winston from 'winston';
 import sinon from 'sinon';
 import nock from 'nock';
-import { SumoLogic } from '../lib/winston-sumologic-transport';
+import { SumoLogic } from './winston-sumologic-transport';
 
 const assert = chai.assert;
 

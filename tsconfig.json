@@ -6,12 +6,11 @@
     "noImplicitThis": true,
     "moduleResolution": "node",
     "sourceMap": true,
+    "rootDir": "src",
     "outDir": "lib",
     "baseUrl": "."
   },
-  "include": [
-    "./cleanup/**/*",
-    "./src/**/*",
-    "./test/**/*"
+  "exclude": [
+    "./**/*.test.ts"
   ]
 }
