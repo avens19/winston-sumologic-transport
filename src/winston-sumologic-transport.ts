@@ -59,8 +59,6 @@ export class SumoLogic extends TransportStream {
         try {
           this._promise = this._sendLogs();
           await this._promise;
-        } catch (e) {
-          throw e;
         } finally {
           this._isSending = false;
         }
