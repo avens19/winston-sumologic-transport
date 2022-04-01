@@ -65,6 +65,27 @@ describe('winston-sumologic-transport', () => {
     sinon.assert.calledWithMatch(onError, sinon.match({ message: 'Uh oh' }));
   });
 
+  it('doesn\'t crash when there is an error sending to sumo', async function() {
+    try {
+      const scope = nock('http://sumologic.com')
+        .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
+        .replyWithError(new Error('Uh oh'));
+      const transport = new SumoLogic({
+        url: 'http://sumologic.com/logs'
+      });
+      const logger = winston.createLogger({ transports: [transport] });
+      logger.info('foo', { extra: 'something' });
+      // shouldn't get logged as the default log level is info
+      logger.verbose('hello', { totally: 'different' });
+      logger.error('bar', { something: 'different' });
+      this.clock.tick(1050);
+      await transport._promise;
+      assert.ok(scope.isDone(), 'ensure all requests were handled');
+    } catch (e) {
+      assert.fail('Should not have thrown: ' + e);
+    }
+  });
+
   it('obeys the interval setting', async function() {
     const scope = nock('http://sumologic.com')
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')

@@ -21,6 +21,8 @@ export class SumoLogic extends TransportStream {
   name: string;
   url: string;
   label: string;
+  level: string;
+  silent: boolean;
   meta?: object;
   onError?: (error: Error) => Promise<void>;
   _timer: NodeJS.Timeout | undefined;
@@ -80,7 +82,8 @@ export class SumoLogic extends TransportStream {
     if (this.onError) {
       return Promise.resolve(this.onError(e));
     }
-    return Promise.reject(e);
+    console.error('[winston-sumologic-transport]: Error sending logs to SumoLogic!', e);
+    return Promise.resolve();
   }
 
   async _sendLogs(): Promise<void> {
