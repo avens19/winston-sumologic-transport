@@ -32,7 +32,7 @@ export class SumoLogic extends TransportStream {
   _timerInterval: number;
 
   constructor(options?: SumoLogicTransportOptions) {
-    super();
+    super(options);
 
     if (!options) {
       options = <SumoLogicTransportOptions> {};
