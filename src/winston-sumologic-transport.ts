@@ -1,5 +1,5 @@
-import axios from 'axios';
-import TransportStream from 'winston-transport';
+import axios from "axios";
+import TransportStream from "winston-transport";
 
 export interface SumoLogicTransportOptions {
   url?: string;
@@ -8,6 +8,9 @@ export interface SumoLogicTransportOptions {
   interval?: number;
   label?: string;
   meta?: object;
+  customSourceCategory?: string;
+  customSourceHost?: string;
+  customSourceName?: string;
   onError?: (error: Error) => Promise<void>;
 }
 
@@ -24,6 +27,9 @@ export class SumoLogic extends TransportStream {
   level: string;
   silent: boolean;
   meta?: object;
+  customSourceCategory?: string;
+  customSourceHost?: string;
+  customSourceName?: string;
   onError?: (error: Error) => Promise<void>;
   _timer: NodeJS.Timeout | undefined;
   _waitingLogs: Array<SumoLogicLogEntry>;
@@ -35,18 +41,23 @@ export class SumoLogic extends TransportStream {
     super(options);
 
     if (!options) {
-      options = <SumoLogicTransportOptions> {};
+      options = <SumoLogicTransportOptions>{};
     }
     if (!options.url) {
-      throw new Error('Need SumoLogic URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source');
+      throw new Error(
+        "Need SumoLogic URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source"
+      );
     }
 
-    this.name = 'SumoLogic';
+    this.name = "SumoLogic";
     this.url = options.url;
-    this.level = options.level || 'info';
+    this.level = options.level || "info";
     this.silent = options.silent || false;
-    this.label = options.label || '';
+    this.label = options.label || "";
     this.meta = options.meta || {};
+    this.customSourceCategory = options.customSourceCategory;
+    this.customSourceHost = options.customSourceHost;
+    this.customSourceName = options.customSourceName;
     this.onError = options.onError;
     this._timerInterval = options.interval || 1000;
     this._waitingLogs = [];
@@ -75,14 +86,29 @@ export class SumoLogic extends TransportStream {
   }
 
   _request(content: string) {
-      return axios.post(this.url, content);
+    return axios.post(this.url, content, {
+      headers: {
+        ...(this.customSourceName
+          ? { "X-Sumo-Name": this.customSourceName }
+          : {}),
+        ...(this.customSourceHost
+          ? { "X-Sumo-Host": this.customSourceHost }
+          : {}),
+        ...(this.customSourceCategory
+          ? { "X-Sumo-Category": this.customSourceCategory }
+          : {})
+      }
+    });
   }
 
   _handleError(e: Error): Promise<void> {
     if (this.onError) {
       return Promise.resolve(this.onError(e));
     }
-    console.error('[winston-sumologic-transport]: Error sending logs to SumoLogic!', e);
+    console.error(
+      "[winston-sumologic-transport]: Error sending logs to SumoLogic!",
+      e
+    );
     return Promise.resolve();
   }
 
@@ -92,9 +118,9 @@ export class SumoLogic extends TransportStream {
         return undefined;
       }
       const numBeingSent = this._waitingLogs.length;
-      let content = '';
+      let content = "";
       for (let i = 0; i < numBeingSent; i++) {
-        content += JSON.stringify(this._waitingLogs[i]) + '\n';
+        content += JSON.stringify(this._waitingLogs[i]) + "\n";
       }
       await this._request(content);
       this._waitingLogs.splice(0, numBeingSent);
@@ -117,11 +143,11 @@ export class SumoLogic extends TransportStream {
       const { level, message, ...meta } = info;
 
       let _meta = meta || {};
-      if (typeof _meta === 'function') {
+      if (typeof _meta === "function") {
         callback = meta;
         _meta = {};
       }
-      _meta = {...this.meta, ..._meta};
+      _meta = { ...this.meta, ..._meta };
       _meta = Object.keys(_meta).length === 0 ? undefined : _meta;
       let _message = message;
       if (this.label) {

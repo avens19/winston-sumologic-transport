@@ -16,11 +16,51 @@ describe('winston-sumologic-transport', () => {
   });
 
   it('sends logs to the given url every second', async function() {
-    const scope = nock('http://sumologic.com')
+    const scope = nock('http://sumologic.com', {
+      badheaders: ['X-Sumo-Name', 'X-Sumo-Category', 'X-Sumo-Host']
+    })
       .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
       .reply(200, {});
     const transport = new SumoLogic({
       url: 'http://sumologic.com/logs'
+    });
+    const logger = winston.createLogger({ transports: [transport] });
+    logger.info('foo', { extra: 'something' });
+    // shouldn't get logged as the default log level is info
+    logger.verbose('hello', { totally: 'different' });
+    logger.error('bar', { something: 'different' });
+    this.clock.tick(1050);
+    await transport._promise;
+    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    // set up next request
+    scope.post('/logs', '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n')
+      .reply(200, {});
+    this.clock.tick(1050);
+    await transport._promise;
+    // No request was sent because there were no messages
+    assert.notOk(scope.isDone(), 'a request is still waiting');
+    logger.info('moo', { extra: 'something' });
+    logger.error('far', { something: 'different' });
+    this.clock.tick(1050);
+    await transport._promise;
+    assert.ok(scope.isDone(), 'ensure all requests were handled');
+  });
+
+  it('sends custom headers if specified', async function() {
+    const scope = nock('http://sumologic.com', {
+      reqheaders: {
+        'X-Sumo-Host': 'host',
+        'X-Sumo-Category': 'category',
+        'X-Sumo-Name': 'name'
+      }
+    })
+      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
+      .reply(200, {});
+    const transport = new SumoLogic({
+      url: 'http://sumologic.com/logs',
+      customSourceCategory: 'category',
+      customSourceHost: 'host',
+      customSourceName: 'name'
     });
     const logger = winston.createLogger({ transports: [transport] });
     logger.info('foo', { extra: 'something' });

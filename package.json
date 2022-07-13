@@ -2,7 +2,7 @@
   "name": "winston-sumologic-transport",
   "description": "A Winston transport for SumoLogic",
   "license": "MIT",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "author": {
     "name": "Andrew Ovens",
     "email": "avens19@gmail.com"
@@ -51,7 +51,7 @@
     "typescript": "^4.5.5",
     "winston": "^3.4.0"
   },
-  "files":[
+  "files": [
     "lib"
   ],
   "main": "./lib/winston-sumologic-transport",
