@@ -140,11 +140,12 @@ export class SumoLogic extends TransportStream {
         callback();
         return;
       }
-      const { level, message, ...meta } = info;
+      const { level, message } = info;
 
-      let _meta = meta || {};
+      const splat = info[Symbol.for("splat")];
+      let _meta = (splat && splat.length && splat[0]) || {};
       if (typeof _meta === "function") {
-        callback = meta;
+        callback = _meta;
         _meta = {};
       }
       _meta = { ...this.meta, ..._meta };

@@ -2,7 +2,7 @@
   "name": "winston-sumologic-transport",
   "description": "A Winston transport for SumoLogic",
   "license": "MIT",
-  "version": "5.2.1",
+  "version": "5.3.0",
   "author": {
     "name": "Andrew Ovens",
     "email": "avens19@gmail.com"
@@ -23,33 +23,32 @@
     "sumo"
   ],
   "dependencies": {
-    "axios": "^0.25.0",
-    "winston-transport": "^4.4.2"
+    "axios": "^1.6.2",
+    "winston-transport": "^4.6.0"
   },
   "devDependencies": {
-    "@tsconfig/node12": "^1.0.9",
-    "@types/chai": "^4.3.0",
-    "@types/mocha": "^9.1.0",
-    "@types/node": "^12.12.6",
-    "@types/sinon": "^10.0.8",
-    "@typescript-eslint/eslint-plugin": "5.10.1",
-    "@typescript-eslint/parser": "^5.10.1",
-    "chai": "^4.3.5",
-    "eslint": "^8.7.0",
+    "@tsconfig/node20": "^20.1.2",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.0",
+    "@types/sinon": "^17.0.2",
+    "@typescript-eslint/eslint-plugin": "6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "chai": "^4.3.10",
+    "eslint": "^8.54.0",
     "eslint-config-strict": "^14.0.1",
-    "eslint-plugin-mocha": "^10.0.3",
-    "logform": "^2.3.2",
-    "mocha": "^9.2.0",
-    "nock": "^13.2.2",
+    "eslint-plugin-mocha": "^10.2.0",
+    "logform": "^2.6.0",
+    "mocha": "^10.2.0",
+    "nock": "^13.3.8",
     "npm-run-all": "^4.1.5",
     "promise-mock": "^2.1.0",
-    "rimraf": "^3.0.2",
-    "sinon": "^12.0.1",
-    "ts-mocha": "^9.0.2",
-    "ts-node": "^10.4.0",
-    "tslint": "^6.1.2",
-    "typescript": "^4.5.5",
-    "winston": "^3.4.0"
+    "rimraf": "^5.0.5",
+    "sinon": "^17.0.1",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2",
+    "winston": "^3.11.0"
   },
   "files": [
     "lib"
@@ -61,7 +60,6 @@
     "tsc": "tsc",
     "compile": "run-s clean tsc",
     "prepublish": "npm run compile",
-    "test": "ts-mocha -p ./tsconfig.json ./src/**/*.test.ts",
-    "tslint": "tslint --project tsconfig.json --config tslint.json"
+    "test": "ts-mocha -p ./tsconfig.json ./src/**/*.test.ts"
   }
 }

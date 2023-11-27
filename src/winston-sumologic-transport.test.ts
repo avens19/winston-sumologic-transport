@@ -1,12 +1,12 @@
-import chai from 'chai';
-import winston from 'winston';
-import sinon from 'sinon';
-import nock from 'nock';
-import { SumoLogic } from './winston-sumologic-transport';
+import chai from "chai";
+import winston from "winston";
+import sinon from "sinon";
+import nock from "nock";
+import { SumoLogic } from "./winston-sumologic-transport";
 
 const assert = chai.assert;
 
-describe('winston-sumologic-transport', () => {
+describe("winston-sumologic-transport", () => {
   beforeEach(function() {
     this.clock = sinon.useFakeTimers();
     winston.clear();
@@ -15,215 +15,247 @@ describe('winston-sumologic-transport', () => {
     this.clock.restore();
   });
 
-  it('sends logs to the given url every second', async function() {
-    const scope = nock('http://sumologic.com', {
-      badheaders: ['X-Sumo-Name', 'X-Sumo-Category', 'X-Sumo-Host']
+  it("sends logs to the given url every second", async function() {
+    const scope = nock("http://sumologic.com", {
+      badheaders: ["X-Sumo-Name", "X-Sumo-Category", "X-Sumo-Host"]
     })
-      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
+      .post(
+        "/logs",
+        '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
+      )
       .reply(200, {});
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs'
+      url: "http://sumologic.com/logs"
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('foo', { extra: 'something' });
+    logger.info("foo", { extra: "something" });
     // shouldn't get logged as the default log level is info
-    logger.verbose('hello', { totally: 'different' });
-    logger.error('bar', { something: 'different' });
+    logger.verbose("hello", { totally: "different" });
+    logger.error("bar", { something: "different" });
     this.clock.tick(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    assert.ok(scope.isDone(), "ensure all requests were handled");
     // set up next request
-    scope.post('/logs', '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n')
+    scope
+      .post(
+        "/logs",
+        '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n'
+      )
       .reply(200, {});
     this.clock.tick(1050);
     await transport._promise;
     // No request was sent because there were no messages
-    assert.notOk(scope.isDone(), 'a request is still waiting');
-    logger.info('moo', { extra: 'something' });
-    logger.error('far', { something: 'different' });
+    assert.notOk(scope.isDone(), "a request is still waiting");
+    logger.info("moo", { extra: "something" });
+    logger.error("far", { something: "different" });
     this.clock.tick(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    assert.ok(scope.isDone(), "ensure all requests were handled");
   });
 
-  it('sends custom headers if specified', async function() {
-    const scope = nock('http://sumologic.com', {
+  it("sends custom headers if specified", async function() {
+    const scope = nock("http://sumologic.com", {
       reqheaders: {
-        'X-Sumo-Host': 'host',
-        'X-Sumo-Category': 'category',
-        'X-Sumo-Name': 'name'
+        "X-Sumo-Host": "host",
+        "X-Sumo-Category": "category",
+        "X-Sumo-Name": "name"
       }
     })
-      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
+      .post(
+        "/logs",
+        '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
+      )
       .reply(200, {});
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
-      customSourceCategory: 'category',
-      customSourceHost: 'host',
-      customSourceName: 'name'
+      url: "http://sumologic.com/logs",
+      customSourceCategory: "category",
+      customSourceHost: "host",
+      customSourceName: "name"
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('foo', { extra: 'something' });
+    logger.info("foo", { extra: "something" });
     // shouldn't get logged as the default log level is info
-    logger.verbose('hello', { totally: 'different' });
-    logger.error('bar', { something: 'different' });
+    logger.verbose("hello", { totally: "different" });
+    logger.error("bar", { something: "different" });
     this.clock.tick(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    assert.ok(scope.isDone(), "ensure all requests were handled");
     // set up next request
-    scope.post('/logs', '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n')
+    scope
+      .post(
+        "/logs",
+        '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n'
+      )
       .reply(200, {});
     this.clock.tick(1050);
     await transport._promise;
     // No request was sent because there were no messages
-    assert.notOk(scope.isDone(), 'a request is still waiting');
-    logger.info('moo', { extra: 'something' });
-    logger.error('far', { something: 'different' });
+    assert.notOk(scope.isDone(), "a request is still waiting");
+    logger.info("moo", { extra: "something" });
+    logger.error("far", { something: "different" });
     this.clock.tick(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    assert.ok(scope.isDone(), "ensure all requests were handled");
   });
 
-  it('calls onError when there is an error sending to sumo', async function() {
-    const scope = nock('http://sumologic.com')
-      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
-      .replyWithError(new Error('Uh oh'));
+  it("calls onError when there is an error sending to sumo", async function() {
+    const scope = nock("http://sumologic.com")
+      .post(
+        "/logs",
+        '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
+      )
+      .replyWithError(new Error("Uh oh"));
     const onError = sinon.spy();
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
+      url: "http://sumologic.com/logs",
       onError
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('foo', { extra: 'something' });
+    logger.info("foo", { extra: "something" });
     // shouldn't get logged as the default log level is info
-    logger.verbose('hello', { totally: 'different' });
-    logger.error('bar', { something: 'different' });
+    logger.verbose("hello", { totally: "different" });
+    logger.error("bar", { something: "different" });
     this.clock.tick(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    assert.ok(scope.isDone(), "ensure all requests were handled");
     sinon.assert.calledWithMatch(onError, sinon.match.instanceOf(Error));
-    sinon.assert.calledWithMatch(onError, sinon.match({ message: 'Uh oh' }));
+    sinon.assert.calledWithMatch(onError, sinon.match({ message: "Uh oh" }));
   });
 
-  it('doesn\'t crash when there is an error sending to sumo', async function() {
+  it("doesn't crash when there is an error sending to sumo", async function() {
     try {
-      const scope = nock('http://sumologic.com')
-        .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
-        .replyWithError(new Error('Uh oh'));
+      const scope = nock("http://sumologic.com")
+        .post(
+          "/logs",
+          '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
+        )
+        .replyWithError(new Error("Uh oh"));
       const transport = new SumoLogic({
-        url: 'http://sumologic.com/logs'
+        url: "http://sumologic.com/logs"
       });
       const logger = winston.createLogger({ transports: [transport] });
-      logger.info('foo', { extra: 'something' });
+      logger.info("foo", { extra: "something" });
       // shouldn't get logged as the default log level is info
-      logger.verbose('hello', { totally: 'different' });
-      logger.error('bar', { something: 'different' });
+      logger.verbose("hello", { totally: "different" });
+      logger.error("bar", { something: "different" });
       this.clock.tick(1050);
       await transport._promise;
-      assert.ok(scope.isDone(), 'ensure all requests were handled');
+      assert.ok(scope.isDone(), "ensure all requests were handled");
     } catch (e) {
-      assert.fail('Should not have thrown: ' + e);
+      assert.fail("Should not have thrown: " + e);
     }
   });
 
-  it('obeys the interval setting', async function() {
-    const scope = nock('http://sumologic.com')
-      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n')
+  it("obeys the interval setting", async function() {
+    const scope = nock("http://sumologic.com")
+      .post(
+        "/logs",
+        '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
+      )
       .reply(200, {});
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
+      url: "http://sumologic.com/logs",
       interval: 4000
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('foo', { extra: 'something' });
-    logger.error('bar', { something: 'different' });
+    logger.info("foo", { extra: "something" });
+    logger.error("bar", { something: "different" });
     this.clock.tick(1050);
     await transport._promise;
-    assert.notOk(scope.isDone(), 'a request is still waiting');
+    assert.notOk(scope.isDone(), "a request is still waiting");
     this.clock.tick(1050);
     await transport._promise;
-    assert.notOk(scope.isDone(), 'a request is still waiting');
-    this.clock.tick(1050);
-    await  transport._promise;
-    assert.notOk(scope.isDone(), 'a request is still waiting');
+    assert.notOk(scope.isDone(), "a request is still waiting");
     this.clock.tick(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), 'ensure all requests were handled');
+    assert.notOk(scope.isDone(), "a request is still waiting");
+    this.clock.tick(1050);
+    await transport._promise;
+    assert.ok(scope.isDone(), "ensure all requests were handled");
   });
 
-  it('obeys the level setting', () => {
+  it("obeys the level setting", () => {
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
-      level: 'error'
+      url: "http://sumologic.com/logs",
+      level: "error"
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('this won\'t be logged');
-    logger.silly('neither will this');
-    logger.warn('not even this one');
-    logger.error('finally something to log');
+    logger.info("this won't be logged");
+    logger.silly("neither will this");
+    logger.warn("not even this one");
+    logger.error("finally something to log");
     assert.strictEqual(transport._waitingLogs.length, 1);
-    assert.strictEqual(transport._waitingLogs[0].message, 'finally something to log');
+    assert.strictEqual(
+      transport._waitingLogs[0].message,
+      "finally something to log"
+    );
   });
 
-  it('obeys the silent setting', () => {
+  it("obeys the silent setting", () => {
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
+      url: "http://sumologic.com/logs",
       silent: true
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('this won\'t be logged');
-    logger.silly('neither will this');
-    logger.warn('not even this one');
-    logger.error('nada');
+    logger.info("this won't be logged");
+    logger.silly("neither will this");
+    logger.warn("not even this one");
+    logger.error("nada");
     assert.strictEqual(transport._waitingLogs.length, 0);
   });
 
-  it('obeys the label setting', () => {
+  it("obeys the label setting", () => {
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
-      label: 'test'
+      url: "http://sumologic.com/logs",
+      label: "test"
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('this message has a label');
-    assert.strictEqual(transport._waitingLogs[0].message, '[test] this message has a label');
+    logger.info("this message has a label");
+    assert.strictEqual(
+      transport._waitingLogs[0].message,
+      "[test] this message has a label"
+    );
   });
 
-  it('obeys the meta setting', () => {
+  it("obeys the meta setting", () => {
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs',
-      label: 'test',
+      url: "http://sumologic.com/logs",
+      label: "test",
       meta: {
-        myMetaKey1: 'val',
+        myMetaKey1: "val",
         myMetaKey2: 123
       }
     });
     winston.add(transport);
-    winston.info('this message has a meta', {
+    winston.info("this message has a meta", {
       myMetaKey3: true,
       myMetaKey2: 124
     });
-    winston.info('this message does not have a meta');
+    winston.info("this message does not have a meta");
     assert.deepStrictEqual(transport._waitingLogs[0].meta, {
-      myMetaKey1: 'val',
+      myMetaKey1: "val",
       myMetaKey2: 124,
       myMetaKey3: true
     });
     assert.deepStrictEqual(transport._waitingLogs[1].meta, {
-      myMetaKey1: 'val',
+      myMetaKey1: "val",
       myMetaKey2: 123
     });
   });
 
-  it('exits cleanly when no logs are pending', async function() {
+  it("exits cleanly when no logs are pending", async function() {
     const { clock } = this;
-    nock('http://sumologic.com')
-      .post('/logs', '{"level":"info","message":"foo","meta":{"extra":"something"}}\n')
+    nock("http://sumologic.com")
+      .post(
+        "/logs",
+        '{"level":"info","message":"foo","meta":{"extra":"something"}}\n'
+      )
       .reply(200, {});
     const transport = new SumoLogic({
-      url: 'http://sumologic.com/logs'
+      url: "http://sumologic.com/logs"
     });
     const logger = winston.createLogger({ transports: [transport] });
-    logger.info('foo', { extra: 'something' });
+    logger.info("foo", { extra: "something" });
     clock.tick(1050);
     await transport._promise;
     clock.runAll();

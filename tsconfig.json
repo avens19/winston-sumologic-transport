@@ -1,17 +1,15 @@
 {
-  "extends": "@tsconfig/node12/tsconfig.json",
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "sourceMap": true,
     "rootDir": "src",
     "outDir": "lib",
     "baseUrl": "."
   },
-  "exclude": [
-    "./**/*.test.ts"
-  ]
+  "exclude": ["./**/*.test.ts", "./lib", "./node_modules"]
 }
