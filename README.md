@@ -1,9 +1,11 @@
 # winston-sumologic-transport
+
 A transport for the Winston logger for logging to a SumoLogic endpoint
 
 [![Version npm](https://img.shields.io/npm/v/winston-sumologic-transport.svg?style=flat-square)](https://www.npmjs.com/package/winston-sumologic-transport)[![Build Status](https://img.shields.io/travis/avens19/winston-sumologic-transport/master.svg?style=flat-square)](https://travis-ci.org/avens19/winston-sumologic-transport)
 
 ## Installation
+
 ```
 npm install --save winston-sumologic-transport
 ```
@@ -11,20 +13,21 @@ npm install --save winston-sumologic-transport
 ## Usage
 
 ```javascript
-  var winston = require('winston');
-  var { SumoLogic } = require('winston-sumologic-transport');
+const winston = require("winston");
+const { SumoLogic } = require("winston-sumologic-transport");
 
-  var options = {
-    url: 'http://example.com'
-  };
+const options = {
+  url: "http://example.com"
+};
 
-  winston.add(SumoLogic, options);
-  winston.debug("Hello, world!");
+winston.add(new SumoLogic(options));
+winston.debug("Hello, world!");
 ```
 
 ## SumoLogic message
 
 After logging message appears in SumoLogic in following format:
+
 ```json
 {
   level: "debug"

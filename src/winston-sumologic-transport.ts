@@ -66,7 +66,7 @@ export class SumoLogic extends TransportStream {
   }
 
   _startTimer() {
-    this._timer = setInterval(async() => {
+    this._timer = setInterval(async () => {
       if (!this._isSending) {
         this._isSending = true;
         try {
@@ -88,6 +88,7 @@ export class SumoLogic extends TransportStream {
   _request(content: string) {
     return axios.post(this.url, content, {
       headers: {
+        "Content-Type": "text/plain",
         ...(this.customSourceName
           ? { "X-Sumo-Name": this.customSourceName }
           : {}),

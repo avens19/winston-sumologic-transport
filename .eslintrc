@@ -1,5 +1,5 @@
 {
-  "extends": ["plugin:@typescript-eslint/recommended"],
+  "extends": ["plugin:@typescript-eslint/recommended", "prettier"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2018,
@@ -8,40 +8,5 @@
   "plugins": ["@typescript-eslint"],
   "env": {
     "mocha": true
-  },
-  "rules": {
-    "comma-dangle": [2, "never"],
-    "complexity": 0,
-    "consistent-return": 0,
-    "default-case": 0,
-    "eol-last": 0,
-    "filenames/filenames": 0,
-    "func-names": 0,
-    "generator-star-spacing": [2, "neither"],
-    "global-require": 0,
-    "id-blacklist": 0,
-    "id-length": 0,
-    "id-match": 0,
-    "linebreak-style": 0,
-    "max-len": 0,
-    "max-params": 0,
-    "max-statements": 0,
-    "newline-after-var": 0,
-    "no-inline-comments": 0,
-    "no-invalid-this": 0,
-    "no-magic-numbers": 0,
-    "no-negated-condition": 0,
-    "no-nested-ternary": 0,
-    "no-sync": 0,
-    "no-undefined": 0,
-    "no-underscore-dangle": 0,
-    "no-use-before-define": 0,
-    "no-warning-comments": 0,
-    "prefer-reflect": 0,
-    "quote-props": [2, "as-needed"],
-    "sort-imports": 0,
-    "space-before-function-paren": [2, "never"],
-    "spaced-comment": 0,
-    "template-curly-spacing": 0
   }
 }
