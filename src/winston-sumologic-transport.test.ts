@@ -56,7 +56,7 @@ describe("winston-sumologic-transport", () => {
     })
       .post(
         "/logs",
-        '{"level":"info","message":"foo duration=500ms","meta":{"durationMs":500}}\n'
+        '{"level":"info","message":"foo","meta":{"durationMs":500}}\n'
       )
       .reply(200, {});
     const transport = new SumoLogic({
