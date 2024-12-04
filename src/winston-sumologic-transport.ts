@@ -155,6 +155,10 @@ export class SumoLogic extends TransportStream {
       if (this.label) {
         _message = `[${this.label}] ${message}`;
       }
+      if ("durationMs" in info && typeof info.durationMs === "number") {
+        _meta = { ..._meta, durationMs: info.durationMs };
+        _message = `${_message} duration=${info.durationMs}ms`;
+      }
       const content = {
         level,
         message: _message,

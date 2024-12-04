@@ -1,21 +1,18 @@
-import chai from "chai";
+import { jest, describe, expect, it, beforeEach } from "@jest/globals";
 import winston from "winston";
-import sinon from "sinon";
 import nock from "nock";
 import { SumoLogic } from "./winston-sumologic-transport";
+import { AxiosError } from "axios";
 
-const assert = chai.assert;
+jest.useFakeTimers();
+
+beforeEach(() => {
+  nock.cleanAll();
+  jest.clearAllTimers();
+});
 
 describe("winston-sumologic-transport", () => {
-  beforeEach(function() {
-    this.clock = sinon.useFakeTimers();
-    winston.clear();
-  });
-  afterEach(function() {
-    this.clock.restore();
-  });
-
-  it("sends logs to the given url every second", async function() {
+  it("sends logs to the given url every second", async function () {
     const scope = nock("http://sumologic.com", {
       badheaders: ["X-Sumo-Name", "X-Sumo-Category", "X-Sumo-Host"]
     })
@@ -32,9 +29,9 @@ describe("winston-sumologic-transport", () => {
     // shouldn't get logged as the default log level is info
     logger.verbose("hello", { totally: "different" });
     logger.error("bar", { something: "different" });
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), "ensure all requests were handled");
+    expect(scope.isDone()).toBeTruthy();
     // set up next request
     scope
       .post(
@@ -42,18 +39,39 @@ describe("winston-sumologic-transport", () => {
         '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n'
       )
       .reply(200, {});
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
     // No request was sent because there were no messages
-    assert.notOk(scope.isDone(), "a request is still waiting");
+    expect(scope.isDone()).toBeFalsy();
     logger.info("moo", { extra: "something" });
     logger.error("far", { something: "different" });
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), "ensure all requests were handled");
+    expect(scope.isDone()).toBeTruthy();
   });
 
-  it("sends custom headers if specified", async function() {
+  it("supports profiling", async function () {
+    const scope = nock("http://sumologic.com", {
+      badheaders: ["X-Sumo-Name", "X-Sumo-Category", "X-Sumo-Host"]
+    })
+      .post(
+        "/logs",
+        '{"level":"info","message":"foo duration=500ms","meta":{"durationMs":500}}\n'
+      )
+      .reply(200, {});
+    const transport = new SumoLogic({
+      url: "http://sumologic.com/logs"
+    });
+    const logger = winston.createLogger({ transports: [transport] });
+    logger.profile("foo", { extra: "something" });
+    jest.advanceTimersByTime(500);
+    logger.profile("foo", { extra: "something" });
+    jest.advanceTimersByTime(1050);
+    await transport._promise;
+    expect(scope.isDone()).toBeTruthy();
+  });
+
+  it("sends custom headers if specified", async function () {
     const scope = nock("http://sumologic.com", {
       reqheaders: {
         "X-Sumo-Host": "host",
@@ -77,9 +95,9 @@ describe("winston-sumologic-transport", () => {
     // shouldn't get logged as the default log level is info
     logger.verbose("hello", { totally: "different" });
     logger.error("bar", { something: "different" });
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), "ensure all requests were handled");
+    expect(scope.isDone()).toBeTruthy();
     // set up next request
     scope
       .post(
@@ -87,25 +105,27 @@ describe("winston-sumologic-transport", () => {
         '{"level":"info","message":"moo","meta":{"extra":"something"}}\n{"level":"error","message":"far","meta":{"something":"different"}}\n'
       )
       .reply(200, {});
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
     // No request was sent because there were no messages
-    assert.notOk(scope.isDone(), "a request is still waiting");
+    expect(scope.isDone()).toBeFalsy();
     logger.info("moo", { extra: "something" });
     logger.error("far", { something: "different" });
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), "ensure all requests were handled");
+    expect(scope.isDone()).toBeTruthy();
   });
 
-  it("calls onError when there is an error sending to sumo", async function() {
+  it("calls onError when there is an error sending to sumo", async function () {
     const scope = nock("http://sumologic.com")
       .post(
         "/logs",
         '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
       )
-      .replyWithError(new Error("Uh oh"));
-    const onError = sinon.spy();
+      .reply(500, '"Uh oh"');
+    const onError = jest
+      .fn<(error: Error) => Promise<void>>()
+      .mockResolvedValue();
     const transport = new SumoLogic({
       url: "http://sumologic.com/logs",
       onError
@@ -115,21 +135,24 @@ describe("winston-sumologic-transport", () => {
     // shouldn't get logged as the default log level is info
     logger.verbose("hello", { totally: "different" });
     logger.error("bar", { something: "different" });
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), "ensure all requests were handled");
-    sinon.assert.calledWithMatch(onError, sinon.match.instanceOf(Error));
-    sinon.assert.calledWithMatch(onError, sinon.match({ message: "Uh oh" }));
+    expect(scope.isDone()).toBeTruthy();
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    expect(
+      (jest.mocked(onError).mock.calls[0][0] as AxiosError).response?.data
+    ).toEqual("Uh oh");
   });
 
-  it("doesn't crash when there is an error sending to sumo", async function() {
+  it("doesn't crash when there is an error sending to sumo", async function () {
     try {
       const scope = nock("http://sumologic.com")
         .post(
           "/logs",
           '{"level":"info","message":"foo","meta":{"extra":"something"}}\n{"level":"error","message":"bar","meta":{"something":"different"}}\n'
         )
-        .replyWithError(new Error("Uh oh"));
+        .reply(500, '"Uh oh"');
       const transport = new SumoLogic({
         url: "http://sumologic.com/logs"
       });
@@ -138,15 +161,15 @@ describe("winston-sumologic-transport", () => {
       // shouldn't get logged as the default log level is info
       logger.verbose("hello", { totally: "different" });
       logger.error("bar", { something: "different" });
-      this.clock.tick(1050);
+      jest.advanceTimersByTime(1050);
       await transport._promise;
-      assert.ok(scope.isDone(), "ensure all requests were handled");
+      expect(scope.isDone()).toBeTruthy();
     } catch (e) {
-      assert.fail("Should not have thrown: " + e);
+      expect(e).toBeUndefined();
     }
   });
 
-  it("obeys the interval setting", async function() {
+  it("obeys the interval setting", async function () {
     const scope = nock("http://sumologic.com")
       .post(
         "/logs",
@@ -160,18 +183,18 @@ describe("winston-sumologic-transport", () => {
     const logger = winston.createLogger({ transports: [transport] });
     logger.info("foo", { extra: "something" });
     logger.error("bar", { something: "different" });
-    this.clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.notOk(scope.isDone(), "a request is still waiting");
-    this.clock.tick(1050);
+    expect(scope.isDone()).toBeFalsy();
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.notOk(scope.isDone(), "a request is still waiting");
-    this.clock.tick(1050);
+    expect(scope.isDone()).toBeFalsy();
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.notOk(scope.isDone(), "a request is still waiting");
-    this.clock.tick(1050);
+    expect(scope.isDone()).toBeFalsy();
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    assert.ok(scope.isDone(), "ensure all requests were handled");
+    expect(scope.isDone()).toBeTruthy();
   });
 
   it("obeys the level setting", () => {
@@ -184,11 +207,8 @@ describe("winston-sumologic-transport", () => {
     logger.silly("neither will this");
     logger.warn("not even this one");
     logger.error("finally something to log");
-    assert.strictEqual(transport._waitingLogs.length, 1);
-    assert.strictEqual(
-      transport._waitingLogs[0].message,
-      "finally something to log"
-    );
+    expect(transport._waitingLogs.length).toBe(1);
+    expect(transport._waitingLogs[0].message).toBe("finally something to log");
   });
 
   it("obeys the silent setting", () => {
@@ -201,7 +221,7 @@ describe("winston-sumologic-transport", () => {
     logger.silly("neither will this");
     logger.warn("not even this one");
     logger.error("nada");
-    assert.strictEqual(transport._waitingLogs.length, 0);
+    expect(transport._waitingLogs.length).toBe(0);
   });
 
   it("obeys the label setting", () => {
@@ -211,8 +231,8 @@ describe("winston-sumologic-transport", () => {
     });
     const logger = winston.createLogger({ transports: [transport] });
     logger.info("this message has a label");
-    assert.strictEqual(
-      transport._waitingLogs[0].message,
+    expect(transport._waitingLogs.length).toBe(1);
+    expect(transport._waitingLogs[0].message).toBe(
       "[test] this message has a label"
     );
   });
@@ -232,19 +252,19 @@ describe("winston-sumologic-transport", () => {
       myMetaKey2: 124
     });
     winston.info("this message does not have a meta");
-    assert.deepStrictEqual(transport._waitingLogs[0].meta, {
+    expect(transport._waitingLogs.length).toBe(2);
+    expect(transport._waitingLogs[0].meta).toEqual({
       myMetaKey1: "val",
       myMetaKey2: 124,
       myMetaKey3: true
     });
-    assert.deepStrictEqual(transport._waitingLogs[1].meta, {
+    expect(transport._waitingLogs[1].meta).toEqual({
       myMetaKey1: "val",
       myMetaKey2: 123
     });
   });
 
-  it("exits cleanly when no logs are pending", async function() {
-    const { clock } = this;
+  it("exits cleanly when no logs are pending", async function () {
     nock("http://sumologic.com")
       .post(
         "/logs",
@@ -256,8 +276,8 @@ describe("winston-sumologic-transport", () => {
     });
     const logger = winston.createLogger({ transports: [transport] });
     logger.info("foo", { extra: "something" });
-    clock.tick(1050);
+    jest.advanceTimersByTime(1050);
     await transport._promise;
-    clock.runAll();
+    expect(transport._waitingLogs.length).toBe(0);
   });
 });
