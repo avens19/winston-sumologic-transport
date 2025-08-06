@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import TransportStream from "winston-transport";
 
 export interface SumoLogicTransportOptions {
@@ -85,7 +85,7 @@ export class SumoLogic extends TransportStream {
     }
   }
 
-  _request(content: string) {
+  _request(content: string): Promise<AxiosResponse<any, any>> {
     return axios.post(this.url, content, {
       headers: {
         "Content-Type": "text/plain",
