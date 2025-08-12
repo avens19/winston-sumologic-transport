@@ -2,7 +2,7 @@
 
 A transport for the Winston logger for logging to a SumoLogic endpoint
 
-[![Version npm](https://img.shields.io/npm/v/winston-sumologic-transport.svg?style=flat-square)](https://www.npmjs.com/package/winston-sumologic-transport)[![Build Status](https://img.shields.io/travis/avens19/winston-sumologic-transport/master.svg?style=flat-square)](https://travis-ci.org/avens19/winston-sumologic-transport)
+[![Version npm](https://img.shields.io/npm/v/winston-sumologic-transport.svg?style=flat-square)](https://www.npmjs.com/package/winston-sumologic-transport)
 
 ## Installation
 
