@@ -56,7 +56,7 @@ export class SumoLogic extends TransportStream {
     this.customSourceHost = options.customSourceHost;
     this.customSourceName = options.customSourceName;
     this.onError = options.onError;
-    this._timerInterval = options.interval || 1000;
+    this._timerInterval = options.interval ?? 1000;
     this._waitingLogs = [];
     this._isSending = false;
     this._promise = Promise.resolve();
@@ -64,6 +64,7 @@ export class SumoLogic extends TransportStream {
 
   _startTimer() {
     this._timer ??= setInterval(async () => {
+      console.log("sending");
       if (!this._isSending) {
         this._isSending = true;
         try {
@@ -74,12 +75,6 @@ export class SumoLogic extends TransportStream {
         }
       }
     }, this._timerInterval);
-  }
-
-  _clearTimer() {
-    if (this._timer) {
-      clearInterval(this._timer);
-    }
   }
 
   _request(content: string): Promise<AxiosResponse<any, any>> {
@@ -122,9 +117,6 @@ export class SumoLogic extends TransportStream {
       }
       await this._request(content);
       this._waitingLogs.splice(0, numBeingSent);
-      if (this._waitingLogs.length === 0) {
-        this._clearTimer();
-      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return this._handleError(e);
@@ -160,9 +152,8 @@ export class SumoLogic extends TransportStream {
         message: _message,
         meta: _meta
       };
-      if (this._waitingLogs.length === 0) {
-        this._startTimer();
-      }
+      // this is idempotent
+      this._startTimer();
       this._waitingLogs.push(content);
       callback();
     } catch (e) {
