@@ -31,7 +31,6 @@ describe("winston-sumologic-transport", () => {
     logger.error("bar", { something: "different" });
     jest.advanceTimersByTime(1050);
     await transport._promise;
-    console.log("waited");
     expect(scope.isDone()).toBeTruthy();
     // set up next request
     scope

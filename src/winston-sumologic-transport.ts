@@ -64,7 +64,6 @@ export class SumoLogic extends TransportStream {
 
   _startTimer() {
     this._timer ??= setInterval(async () => {
-      console.log("sending");
       if (!this._isSending) {
         this._isSending = true;
         try {
