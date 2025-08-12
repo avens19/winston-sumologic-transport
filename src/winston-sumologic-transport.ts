@@ -37,12 +37,9 @@ export class SumoLogic extends TransportStream {
   _promise: Promise<void>;
   _timerInterval: number;
 
-  constructor(options?: SumoLogicTransportOptions) {
+  constructor(options: SumoLogicTransportOptions = {}) {
     super(options);
 
-    if (!options) {
-      options = <SumoLogicTransportOptions>{};
-    }
     if (!options.url) {
       throw new Error(
         "Need SumoLogic URL. See https://help.sumologic.com/Send-Data/Sources/02Sources-for-Hosted-Collectors/HTTP-Source/zGenerate-a-new-URL-for-an-HTTP-Source"
@@ -51,10 +48,10 @@ export class SumoLogic extends TransportStream {
 
     this.name = "SumoLogic";
     this.url = options.url;
-    this.level = options.level || "info";
-    this.silent = options.silent || false;
-    this.label = options.label || "";
-    this.meta = options.meta || {};
+    this.level = options.level ?? "info";
+    this.silent = options.silent ?? false;
+    this.label = options.label ?? "";
+    this.meta = options.meta ?? {};
     this.customSourceCategory = options.customSourceCategory;
     this.customSourceHost = options.customSourceHost;
     this.customSourceName = options.customSourceName;
@@ -66,7 +63,7 @@ export class SumoLogic extends TransportStream {
   }
 
   _startTimer() {
-    this._timer = setInterval(async () => {
+    this._timer ??= setInterval(async () => {
       if (!this._isSending) {
         this._isSending = true;
         try {
@@ -144,7 +141,7 @@ export class SumoLogic extends TransportStream {
       const { level, message } = info;
 
       const splat = info[Symbol.for("splat")];
-      let _meta = (splat && splat.length && splat[0]) || {};
+      let _meta = splat?.[0] ?? {};
       if (typeof _meta === "function") {
         callback = _meta;
         _meta = {};

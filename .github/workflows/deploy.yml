@@ -4,6 +4,10 @@ on:
   push:
     branches: [master]
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   deploy:
     name: Deploy
@@ -12,3 +16,4 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm ci
       - run: npm test
+      - uses: JS-DevTools/npm-publish@v3
