@@ -78,6 +78,7 @@ export class SumoLogic extends TransportStream {
 
   _request(content: string): Promise<AxiosResponse<any, any>> {
     return axios.post(this.url, content, {
+      adapter: "fetch",
       headers: {
         "Content-Type": "text/plain",
         ...(this.customSourceName

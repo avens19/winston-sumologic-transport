@@ -3,13 +3,13 @@
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "moduleResolution": "Node16",
     "sourceMap": true,
     "rootDir": "src",
-    "outDir": "lib",
-    "baseUrl": "."
+    "outDir": "lib"
   },
   "exclude": ["./**/*.test.ts", "./lib", "./node_modules"]
 }
