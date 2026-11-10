@@ -8,6 +8,11 @@ permissions:
   id-token: write # Required for OIDC
   contents: write
 
+# Publish one release at a time, in push order
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy
@@ -24,13 +29,23 @@ jobs:
         run: npm install -g npm@latest
       - run: npm ci
       - run: npm test
+
+      # The major and minor version come from package.json; the patch version
+      # is the run number of this workflow, so every push to master gets its
+      # own release. To start a new major or minor, edit package.json.
+      - name: Set version
+        id: version
+        run: |
+          base=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')")
+          version="$base.$GITHUB_RUN_NUMBER"
+          npm version "$version" --no-git-tag-version --allow-same-version
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - run: npm publish
-      - id: get-release
-        run: echo "version=$(cat package.json | jq -r '.version')" >> "$GITHUB_OUTPUT"
       - uses: ncipollo/release-action@v1
         with:
-          commit: master
-          name: ${{ steps.get-release.outputs.version }}
-          tag: ${{ steps.get-release.outputs.version }}
+          commit: ${{ github.sha }}
+          name: ${{ steps.version.outputs.version }}
+          tag: ${{ steps.version.outputs.version }}
           generateReleaseNotes: true
           makeLatest: true
